@@ -18,6 +18,9 @@ const App = (() => {
     modalIsHistogram: false,
     modalDefaults: null,
     lastSimulation: null,
+    simFitModel: 'ogive',
+    lastNGroupA: null,
+    lastNGroupB: null,
   };
 
   const chartAreaBackgroundPlugin = {
@@ -72,6 +75,22 @@ const App = (() => {
       simHistY: 'Proportion',
       simHistExpand: 'Click to expand',
       histModalTitle: 'Score distribution',
+      simFitLabel: 'Distribution fit',
+      simFitOgive: 'Normal CDF (bin mass)',
+      exportCsv: 'Export CSV',
+      exportJson: 'Export JSON',
+      exportNeedSimulation: 'Run a simulation first.',
+      bulkLabel: 'Bulk item input',
+      bulkApply: 'Apply bulk input',
+      bulkApplied: 'Bulk input applied: {n} line(s), {items} item(s).',
+      bulkError: 'Could not parse bulk input. Check format.',
+      bulkNoValidLines: 'No valid lines found.',
+      bulkLineErrFormat: 'Expected format: item;A|B;a;b1,b2,... or itemA; a; b1,b2,...',
+      bulkLineErrItem: 'Invalid item id (must be integer >= 1).',
+      bulkLineErrGroup: 'Invalid group (use A or B).',
+      bulkLineErrA: 'Invalid discrimination parameter a.',
+      bulkLineErrB: 'Invalid thresholds list b (comma-separated numbers).',
+      bulkLinePrefix: 'Line {line}: {reason}',
       presetTitle: 'Load example',
       presetNoDIF: 'No DIF',
       presetDIF: 'Uniform DIF',
@@ -118,6 +137,22 @@ const App = (() => {
       simHistY: 'Proporción',
       simHistExpand: 'Clic para ampliar',
       histModalTitle: 'Distribución de puntuaciones',
+      simFitLabel: 'Ajuste de distribución',
+      simFitOgive: 'CDF normal (masa por bin)',
+      exportCsv: 'Exportar CSV',
+      exportJson: 'Exportar JSON',
+      exportNeedSimulation: 'Ejecuta primero una simulación.',
+      bulkLabel: 'Entrada masiva de ítems',
+      bulkApply: 'Aplicar entrada masiva',
+      bulkApplied: 'Entrada aplicada: {n} línea(s), {items} ítem(s).',
+      bulkError: 'No se pudo interpretar la entrada masiva. Revisa el formato.',
+      bulkNoValidLines: 'No se encontraron líneas válidas.',
+      bulkLineErrFormat: 'Formato esperado: item;A|B;a;b1,b2,... o itemA; a; b1,b2,...',
+      bulkLineErrItem: 'Identificador de ítem inválido (entero >= 1).',
+      bulkLineErrGroup: 'Grupo inválido (usa A o B).',
+      bulkLineErrA: 'Parámetro de discriminación a inválido.',
+      bulkLineErrB: 'Lista de umbrales b inválida (números separados por coma).',
+      bulkLinePrefix: 'Línea {line}: {reason}',
       presetTitle: 'Cargar ejemplo',
       presetNoDIF: 'Sin DIF',
       presetDIF: 'DIF uniforme',
@@ -219,7 +254,10 @@ const App = (() => {
     document.getElementById('btn-simulate').addEventListener('click', runSimulation);
     document.getElementById('btn-preset-nodif').addEventListener('click', () => loadPreset('nodif'));
     document.getElementById('btn-preset-dif').addEventListener('click', () => loadPreset('dif'));
+    document.getElementById('btn-apply-bulk').addEventListener('click', applyBulkInput);
     document.getElementById('sim-hist-head').addEventListener('click', openHistModal);
+    document.getElementById('btn-export-csv').addEventListener('click', exportSimulationCsv);
+    document.getElementById('btn-export-json').addEventListener('click', exportSimulationJson);
 
     document.getElementById('btn-view-category').addEventListener('click', () => setViewMode('category'));
     document.getElementById('btn-view-cumulative').addEventListener('click', () => setViewMode('cumulative'));
@@ -303,7 +341,8 @@ const App = (() => {
     document.getElementById('intro-title').textContent = t('introTitle');
     document.getElementById('intro-text').textContent = t('introText');
     document.getElementById('cfg-title').textContent = t('cfgTitle');
-    document.getElementById('cfg-hint').textContent = t('cfgHint');
+    const cfgHint = document.getElementById('cfg-hint');
+    if (cfgHint) cfgHint.textContent = t('cfgHint');
     document.getElementById('lbl-items').textContent = t('lblItems');
     document.getElementById('lbl-cats').textContent = t('lblCats');
     document.getElementById('lbl-group-a').textContent = t('lblGroupA');
@@ -312,14 +351,22 @@ const App = (() => {
     document.getElementById('method-title').textContent = t('methodTitle');
     document.getElementById('method-text').textContent = t('methodText');
     document.getElementById('sim-output-title').textContent = t('simOutputTitle');
-    document.getElementById('sim-output-hint').textContent = t('simOutputHint');
+    const simOutputHint = document.getElementById('sim-output-hint');
+    if (simOutputHint) simOutputHint.textContent = t('simOutputHint');
     document.getElementById('sim-hist-title').textContent = t('simHistTitle');
     document.getElementById('sim-hist-expand').textContent = t('simHistExpand');
+    document.getElementById('lbl-sim-fit').textContent = t('simFitLabel');
+    document.getElementById('sim-fit-model-text').textContent = t('simFitOgive');
+    document.getElementById('btn-export-csv').textContent = t('exportCsv');
+    document.getElementById('btn-export-json').textContent = t('exportJson');
+    document.getElementById('lbl-bulk').textContent = t('bulkLabel');
+    document.getElementById('btn-apply-bulk').textContent = t('bulkApply');
     document.getElementById('lbl-preset').textContent = t('presetTitle');
     document.getElementById('btn-preset-nodif').textContent = t('presetNoDIF');
     document.getElementById('btn-preset-dif').textContent = t('presetDIF');
     document.getElementById('items-title').textContent = t('itemsTitle');
-    document.getElementById('items-hint').textContent = t('itemsHint');
+    const itemsHint = document.getElementById('items-hint');
+    if (itemsHint) itemsHint.textContent = t('itemsHint');
     document.getElementById('btn-view-category').textContent = t('viewCategory');
     document.getElementById('btn-view-cumulative').textContent = t('viewCumulative');
     document.getElementById('btn-modal-view-category').textContent = t('viewCategory');
@@ -710,8 +757,11 @@ const App = (() => {
     const delta = meanB - meanA;
 
     state.lastSimulation = { meanA, meanB, delta };
+    state.lastNGroupA = nA;
+    state.lastNGroupB = nB;
     renderSimulationSummary(state.lastSimulation);
     document.getElementById('sim-results').classList.remove('hidden');
+    document.getElementById('sim-actions-row').classList.remove('hidden');
     state.lastScoresA = scoresA;
     state.lastScoresB = scoresB;
     renderSimHistogram(scoresA, scoresB);
@@ -747,8 +797,8 @@ const App = (() => {
     const meanB = mean(scoresB);
     const sdA = stdDev(scoresA, meanA);
     const sdB = stdDev(scoresB, meanB);
-    const normA = labels.map(x => normalPdf(x, meanA, sdA));
-    const normB = labels.map(x => normalPdf(x, meanB, sdB));
+    const fitA = labels.map(x => normalCdfBinMass(x, meanA, sdA));
+    const fitB = labels.map(x => normalCdfBinMass(x, meanB, sdB));
 
     if (!targetCanvas) {
       const block = document.getElementById('sim-hist-block');
@@ -786,8 +836,8 @@ const App = (() => {
           },
           {
             type: 'line',
-            label: t('simNormalA'),
-            data: normA,
+            label: t('simFitOgive') + ` · ${t('simGroupA')}`,
+            data: fitA,
             borderColor: '#58a6ff',
             borderWidth: 2,
             borderDash: [7, 4],
@@ -797,8 +847,8 @@ const App = (() => {
           },
           {
             type: 'line',
-            label: t('simNormalB'),
-            data: normB,
+            label: t('simFitOgive') + ` · ${t('simGroupB')}`,
+            data: fitB,
             borderColor: '#f85149',
             borderWidth: 2,
             borderDash: [7, 4],
@@ -863,6 +913,9 @@ const App = (() => {
     state.lastScoresA = null;
     state.lastScoresB = null;
     state.lastSimulation = null;
+    state.lastNGroupA = null;
+    state.lastNGroupB = null;
+    document.getElementById('sim-actions-row')?.classList.add('hidden');
   }
 
   function simulateGroupScores(n, group) {
@@ -910,10 +963,30 @@ const App = (() => {
     return Math.sqrt(Math.max(variance, 0));
   }
 
-  function normalPdf(x, mu, sigma) {
+  function erfApprox(x) {
+    const sign = x < 0 ? -1 : 1;
+    const ax = Math.abs(x);
+    const p = 0.3275911;
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const t = 1 / (1 + p * ax);
+    const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-ax * ax);
+    return sign * y;
+  }
+
+  function normalCdf(x, mu, sigma) {
+    if (!(sigma > 0)) return x >= mu ? 1 : 0;
+    return 0.5 * (1 + erfApprox((x - mu) / (sigma * Math.SQRT2)));
+  }
+
+  function normalCdfBinMass(x, mu, sigma) {
     if (!(sigma > 0)) return 0;
-    const z = (x - mu) / sigma;
-    return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
+    const upper = normalCdf(x + 0.5, mu, sigma);
+    const lower = normalCdf(x - 0.5, mu, sigma);
+    return Math.max(0, upper - lower);
   }
 
   function palette(idx) {
@@ -956,6 +1029,227 @@ const App = (() => {
     document.getElementById('sim-summary').innerHTML = '';
     closeModal();
     clearSimHistogram();
+  }
+
+  function applyBulkInput() {
+    const raw = (document.getElementById('bulk-input').value || '').trim();
+    const status = document.getElementById('bulk-status');
+    const errorsEl = document.getElementById('bulk-errors');
+    if (!raw) {
+      status.textContent = t('bulkError');
+      renderBulkErrors([{ line: 0, reason: t('bulkNoValidLines') }]);
+      return;
+    }
+
+    const lines = raw.split(/\r?\n/);
+    const parsed = [];
+    const errors = [];
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      const result = parseBulkLine(trimmed);
+      if (result.skip) {
+        return;
+      }
+      if (result.errorKey) {
+        errors.push({ line: idx + 1, reason: t(result.errorKey), raw: trimmed });
+        return;
+      }
+      parsed.push(result.data);
+    });
+
+    if (errors.length || !parsed.length) {
+      status.textContent = !parsed.length ? t('bulkNoValidLines') : t('bulkError');
+      renderBulkErrors(errors.length ? errors : [{ line: 0, reason: t('bulkNoValidLines') }]);
+      return;
+    }
+
+    const maxItem = Math.max(...parsed.map(x => x.itemId));
+    const maxCats = Math.max(...parsed.map(x => x.b.length + 1));
+    document.getElementById('num-items').value = Math.max(1, Math.min(80, maxItem));
+    document.getElementById('num-cats').value = Math.max(2, Math.min(8, maxCats));
+    buildItemForms();
+
+    for (const entry of parsed) {
+      const item = state.items.find(x => x.id === entry.itemId);
+      if (!item) continue;
+      if (entry.group === 'B') {
+        item.hasDIF = true;
+        item.aB = entry.a;
+        item.bB = normalizeThresholds(entry.b, state.categories, entry.itemId, 'B');
+      } else {
+        item.aA = entry.a;
+        item.bA = normalizeThresholds(entry.b, state.categories, entry.itemId, 'A');
+      }
+    }
+
+    syncItemsToInputs();
+    renderItemCharts();
+    clearSimHistogram();
+    status.textContent = t('bulkApplied', { n: parsed.length, items: maxItem });
+    errorsEl.innerHTML = '';
+    errorsEl.classList.add('hidden');
+  }
+
+  function parseBulkLine(line) {
+    if (!line || line.startsWith('#')) return { skip: true };
+    const parts = line.split(';').map(x => x.trim()).filter(Boolean);
+    if (parts.length < 3) return { errorKey: 'bulkLineErrFormat' };
+
+    let itemToken = parts[0];
+    let group = 'A';
+    let aText;
+    let bText;
+
+    if (parts.length >= 4) {
+      if (!/^(A|B)$/i.test(parts[1])) return { errorKey: 'bulkLineErrGroup' };
+      group = parts[1].toUpperCase();
+      aText = parts[2];
+      bText = parts.slice(3).join(';');
+    } else {
+      const tokenMatch = itemToken.match(/^(\d+)([abAB])?$/);
+      if (!tokenMatch) return { errorKey: 'bulkLineErrItem' };
+      itemToken = tokenMatch[1];
+      if (tokenMatch[2]) group = tokenMatch[2].toUpperCase();
+      aText = parts[1];
+      bText = parts.slice(2).join(';');
+    }
+
+    const itemId = Number(itemToken);
+    const a = Number(aText);
+    const b = bText.split(',').map(x => Number(x.trim())).filter(Number.isFinite);
+    if (!/^(A|B)$/.test(group)) return { errorKey: 'bulkLineErrGroup' };
+    if (!Number.isFinite(itemId) || itemId < 1) return { errorKey: 'bulkLineErrItem' };
+    if (!Number.isFinite(a)) return { errorKey: 'bulkLineErrA' };
+    if (!b.length) return { errorKey: 'bulkLineErrB' };
+    return { data: { itemId, group, a, b } };
+  }
+
+  function renderBulkErrors(errors) {
+    const errorsEl = document.getElementById('bulk-errors');
+    if (!errors?.length) {
+      errorsEl.innerHTML = '';
+      errorsEl.classList.add('hidden');
+      return;
+    }
+    errorsEl.innerHTML = errors.map(err => {
+      if (!err.line) return `<li>${err.reason}</li>`;
+      return `<li>${t('bulkLinePrefix', { line: err.line, reason: err.reason })}</li>`;
+    }).join('');
+    errorsEl.classList.remove('hidden');
+  }
+
+  function syncItemsToInputs() {
+    for (const item of state.items) {
+      const idx = item.id;
+      const inputAA = document.querySelector(`input[data-item="${idx}"][data-field="aA"]`);
+      const inputBA = document.querySelector(`input[data-item="${idx}"][data-field="bA"]`);
+      const chk = document.querySelector(`input[data-item="${idx}"][data-field="hasDIF"]`);
+      const inputAB = document.querySelector(`input[data-item="${idx}"][data-field="aB"]`);
+      const inputBB = document.querySelector(`input[data-item="${idx}"][data-field="bB"]`);
+      const bRow = document.querySelector(`[data-item-b="${idx}"]`);
+      const wrap = document.querySelector(`[data-open-item="${idx}"] .item-chart-head span:first-child`);
+
+      if (inputAA) inputAA.value = item.aA;
+      if (inputBA) inputBA.value = item.bA.join(', ');
+      if (chk) chk.checked = item.hasDIF;
+      if (inputAB) inputAB.value = item.aB;
+      if (inputBB) inputBB.value = item.bB.join(', ');
+      if (bRow) bRow.classList.toggle('hidden', !item.hasDIF);
+      if (wrap) wrap.textContent = item.hasDIF ? 'DIF' : 'No DIF';
+    }
+  }
+
+  function exportSimulationCsv() {
+    if (!state.lastScoresA || !state.lastScoresB || !state.lastSimulation) {
+      alert(t('exportNeedSimulation'));
+      return;
+    }
+    const rows = [];
+    const push = values => rows.push(values.map(csvEscape).join(','));
+    const maxScore = state.items.length * (state.categories - 1);
+    const freqA = new Array(maxScore + 1).fill(0);
+    const freqB = new Array(maxScore + 1).fill(0);
+    state.lastScoresA.forEach(s => { if (s >= 0 && s <= maxScore) freqA[s]++; });
+    state.lastScoresB.forEach(s => { if (s >= 0 && s <= maxScore) freqB[s]++; });
+
+    push(['section', 'metric', 'value']);
+    push(['summary', 'lang', state.lang]);
+    push(['summary', 'n_group_a', state.lastNGroupA]);
+    push(['summary', 'n_group_b', state.lastNGroupB]);
+    push(['summary', 'items', state.items.length]);
+    push(['summary', 'categories', state.categories]);
+    push(['summary', 'mean_a', state.lastSimulation.meanA.toFixed(6)]);
+    push(['summary', 'mean_b', state.lastSimulation.meanB.toFixed(6)]);
+    push(['summary', 'delta', state.lastSimulation.delta.toFixed(6)]);
+
+    rows.push('');
+    push(['item', 'group', 'a', 'b_thresholds']);
+    for (const item of state.items) {
+      push([item.id, 'A', item.aA, item.bA.join('|')]);
+      if (item.hasDIF) push([item.id, 'B', item.aB, item.bB.join('|')]);
+    }
+
+    rows.push('');
+    push(['score', 'freq_a', 'freq_b', 'prop_a', 'prop_b']);
+    for (let s = 0; s <= maxScore; s++) {
+      push([s, freqA[s], freqB[s], (freqA[s] / state.lastScoresA.length).toFixed(8), (freqB[s] / state.lastScoresB.length).toFixed(8)]);
+    }
+
+    const blob = new Blob([rows.join('\n') + '\n'], { type: 'text/csv;charset=utf-8;' });
+    downloadBlob(blob, `dif-accumulation-export-${dateStamp()}.csv`);
+  }
+
+  function exportSimulationJson() {
+    if (!state.lastScoresA || !state.lastScoresB || !state.lastSimulation) {
+      alert(t('exportNeedSimulation'));
+      return;
+    }
+    const payload = {
+      exported_at_utc: new Date().toISOString(),
+      lang: state.lang,
+      simulation: {
+        n_group_a: state.lastNGroupA,
+        n_group_b: state.lastNGroupB,
+        items: state.items.length,
+        categories: state.categories,
+        mean_a: state.lastSimulation.meanA,
+        mean_b: state.lastSimulation.meanB,
+        delta: state.lastSimulation.delta,
+        fit_model: state.simFitModel,
+      },
+      item_parameters: state.items.map(item => ({
+        item: item.id,
+        group_a: { a: item.aA, b: item.bA.slice() },
+        group_b: item.hasDIF ? { a: item.aB, b: item.bB.slice() } : null,
+      })),
+      score_samples: {
+        group_a: state.lastScoresA.slice(),
+        group_b: state.lastScoresB.slice(),
+      },
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2) + '\n'], { type: 'application/json;charset=utf-8;' });
+    downloadBlob(blob, `dif-accumulation-export-${dateStamp()}.json`);
+  }
+
+  function csvEscape(value) {
+    const text = String(value ?? '');
+    if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+    return text;
+  }
+
+  function dateStamp() {
+    return new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   document.addEventListener('DOMContentLoaded', init);

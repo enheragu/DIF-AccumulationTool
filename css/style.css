@@ -59,6 +59,10 @@ main {
   grid-row: 2;
 }
 
+.panel-sim-output.hidden + .panel-items {
+  grid-row: 1;
+}
+
 .panel-header {
   gap: .7rem;
   flex-wrap: wrap;
@@ -74,6 +78,14 @@ input[type='number'], input[type='text'] {
   width: 100%;
   padding: .4rem .55rem;
   font-size: .82rem;
+}
+
+textarea {
+  width: 100%;
+  padding: .5rem .6rem;
+  font-size: .8rem;
+  min-height: 110px;
+  resize: vertical;
 }
 
 input[type='number']::-webkit-outer-spin-button,
@@ -96,7 +108,7 @@ input[type='number'] {
   background: var(--clr-surface);
 }
 
-.stepper .btn-ghost {
+.stepper .btn-stepper {
   border: none;
   border-radius: 0;
   padding: 0;
@@ -105,7 +117,7 @@ input[type='number'] {
   font-size: 1rem;
 }
 
-.stepper .btn-ghost:last-child {
+.stepper .btn-stepper:last-child {
   border-right: none;
   border-left: 1px solid var(--clr-border);
 }
@@ -117,18 +129,26 @@ input[type='number'] {
   padding: .35rem .45rem;
 }
 
-.controls-row { display: flex; gap: .5rem; }
+.controls-row {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
 
 .controls-row .btn-primary {
   width: 100%;
 }
 
-.btn-primary { font-size: .84rem; }
+.btn-export {
+  margin-top: .55rem;
+  width: auto;
+  flex: 1;
+}
 
-.btn-ghost {
-  padding: .42rem .7rem;
-  border-radius: 6px;
-  font-size: .8rem;
+.export-row {
+  margin-top: .55rem;
+  display: flex;
+  gap: .45rem;
 }
 
 /* Local fallback in case shared controls.css is not available yet. */
@@ -247,6 +267,13 @@ input[type='number'] {
 
 .sim-hist-head:hover { background: color-mix(in oklab, var(--clr-chart-bg) 85%, var(--clr-primary)); }
 
+#sim-hist-expand::before {
+  content: '⤢';
+  margin-right: .22rem;
+  font-size: .78rem;
+  line-height: 1;
+}
+
 .sim-hist-block {
   padding: 0;
   overflow: hidden;
@@ -255,11 +282,10 @@ input[type='number'] {
 }
 
 .preset-block {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
   gap: .5rem;
-  flex-wrap: wrap;
 }
 
 .preset-label {
@@ -268,14 +294,111 @@ input[type='number'] {
   white-space: nowrap;
 }
 
+.section-label {
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--clr-primary);
+}
+
 .preset-btns {
   display: flex;
   gap: .35rem;
 }
 
+.preset-block .preset-label {
+  width: auto;
+}
+
+.preset-block .preset-btns {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  width: auto;
+}
+
+.preset-block .preset-btns .btn-ghost {
+  width: 100%;
+  white-space: nowrap;
+}
+
 .preset-btns .btn-ghost {
   font-size: .78rem;
   padding: .22rem .7rem;
+}
+
+.bulk-block details {
+  width: 100%;
+}
+
+.bulk-block summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.bulk-block summary::-webkit-details-marker {
+  display: none;
+}
+
+.bulk-block summary::before {
+  content: '▸';
+  margin-right: .35rem;
+  color: var(--clr-muted);
+}
+
+.bulk-block details[open] summary::before {
+  content: '▾';
+}
+
+.bulk-block details[open] textarea {
+  margin-top: .55rem;
+}
+
+.bulk-block .hint {
+  margin-bottom: .45rem;
+}
+
+.bulk-actions {
+  margin-top: .5rem;
+  justify-content: flex-end;
+}
+
+.bulk-errors {
+  margin: .45rem 0 0;
+  padding-left: 1rem;
+  color: var(--clr-danger);
+  font-size: .76rem;
+}
+
+.bulk-errors li + li {
+  margin-top: .18rem;
+}
+
+.sim-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+  margin-bottom: .7rem;
+  flex-wrap: wrap;
+}
+
+.sim-fit-row {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+}
+
+.sim-fit-row span {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.sim-fit-row strong {
+  font-size: .78rem;
+  color: var(--clr-primary);
 }
 
 .item-forms {
