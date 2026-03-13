@@ -1,0 +1,9 @@
+{
+  "name": "DIF-AccumulationTool",
+  "short_name": "DIFTool",
+  "start_url": "/DIF-AccumulationTool/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#58a6ff",
+  "icons": []
+}

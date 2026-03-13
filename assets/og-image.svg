@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="DIF-AccumulationTool">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b0f14"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="68" y="58" width="1064" height="514" rx="22" fill="#161b22" stroke="#30363d"/>
+
+  <text x="112" y="156" fill="#58a6ff" font-size="56" font-family="Segoe UI, Arial, sans-serif" font-weight="700">DIF-AccumulationTool</text>
+  <text x="112" y="212" fill="#e6edf3" font-size="31" font-family="Segoe UI, Arial, sans-serif">Tiny DIF accumulation simulator for ordered polytomous tests</text>
+  <text x="112" y="258" fill="#8b949e" font-size="24" font-family="Segoe UI, Arial, sans-serif">Item curves and cumulative score impact overview</text>
+
+  <rect x="112" y="302" width="300" height="214" rx="12" fill="#0f1725" stroke="#30363d"/>
+  <rect x="450" y="302" width="300" height="214" rx="12" fill="#0f1725" stroke="#30363d"/>
+  <rect x="788" y="302" width="300" height="214" rx="12" fill="#0f1725" stroke="#30363d"/>
+
+  <text x="132" y="332" fill="#8b949e" font-size="16" font-family="Segoe UI, Arial, sans-serif">Item 1 · no DIF</text>
+  <text x="470" y="332" fill="#8b949e" font-size="16" font-family="Segoe UI, Arial, sans-serif">Item 2 · uniform DIF</text>
+  <text x="808" y="332" fill="#8b949e" font-size="16" font-family="Segoe UI, Arial, sans-serif">Item 3 · non-uniform DIF</text>
+
+  <line x1="136" y1="482" x2="388" y2="482" stroke="#30363d" stroke-width="2"/>
+  <line x1="136" y1="482" x2="136" y2="360" stroke="#30363d" stroke-width="2"/>
+  <line x1="474" y1="482" x2="726" y2="482" stroke="#30363d" stroke-width="2"/>
+  <line x1="474" y1="482" x2="474" y2="360" stroke="#30363d" stroke-width="2"/>
+  <line x1="812" y1="482" x2="1064" y2="482" stroke="#30363d" stroke-width="2"/>
+  <line x1="812" y1="482" x2="812" y2="360" stroke="#30363d" stroke-width="2"/>
+
+  <path d="M142 476 C190 476, 216 474, 238 466 C262 456, 280 436, 296 408 C312 380, 328 350, 346 332 C360 320, 372 316, 382 316" fill="none" stroke="#58a6ff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M142 476 C190 476, 216 474, 238 466 C262 456, 280 436, 296 408 C312 380, 328 350, 346 332 C360 320, 372 316, 382 316" fill="none" stroke="#79c0ff" stroke-width="3" stroke-linecap="round" stroke-dasharray="8 6"/>
+
+  <path d="M480 476 C528 476, 554 474, 576 466 C600 456, 618 436, 634 408 C650 380, 666 350, 684 332 C698 320, 710 316, 722 316" fill="none" stroke="#3fb950" stroke-width="4" stroke-linecap="round"/>
+  <path d="M480 476 C552 476, 584 474, 610 466 C636 456, 656 436, 674 408 C692 378, 706 348, 714 330 C718 322, 720 318, 722 316" fill="none" stroke="#f85149" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="8 6"/>
+
+  <path d="M818 476 C868 476, 894 474, 918 464 C942 452, 960 430, 976 396 C992 362, 1008 334, 1028 320 C1042 310, 1052 306, 1062 304" fill="none" stroke="#bc8cff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M818 476 C892 476, 926 474, 954 466 C980 458, 1000 440, 1018 410 C1034 382, 1046 348, 1054 324 C1058 314, 1060 308, 1062 304" fill="none" stroke="#d29922" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="8 6"/>
+
+  <text x="112" y="546" fill="#8b949e" font-size="17" font-family="Segoe UI, Arial, sans-serif">Solid = Group A · Dashed = Group B</text>
+</svg>

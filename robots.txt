@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://enheragu.github.io/DIF-AccumulationTool/sitemap.xml
