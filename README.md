@@ -2,8 +2,8 @@
 
 > [!WARNING]
 > This standalone repository/page is in **deprecated mode**.
-> Active maintained URL: **https://enheragu.github.io/stat-tools/DIF-AccumulationTool/**
-> Unified tools landing: **https://enheragu.github.io/stat-tools/**
+> Active maintained URL: **https://enheragu.github.io/psychometric-tools/DIF-AccumulationTool/**
+> Unified tools landing: **https://enheragu.github.io/psychometric-tools/**
 
 DIF-AccumulationTool is a static web application to simulate how small item-level DIF effects may accumulate in total scores for ordered polytomous tests.
 
@@ -19,7 +19,7 @@ It lets you:
 Web version:
 
 - ~~https://enheragu.github.io/DIF-AccumulationTool/~~
-- https://enheragu.github.io/stat-tools/DIF-AccumulationTool/
+- https://enheragu.github.io/psychometric-tools/DIF-AccumulationTool/
 
 ---
 
